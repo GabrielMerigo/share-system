@@ -59,3 +59,13 @@ describe("User Sign Up", () => {
     expect(resultWithSameEmail.error).toBeTruthy();
   });
 });
+
+describe("Authentication", () => {
+  it("should return a token when login", async () => {
+    const result = await request
+      .post("/auth")
+      .send({ email: mainUser.email, password: mainUser.password });
+
+    expect(result.body.token).toBeDefined();
+  });
+});
