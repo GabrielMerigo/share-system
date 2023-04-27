@@ -2,6 +2,20 @@ const app = require("../src/app");
 const supertest = require("supertest");
 const request = supertest(app);
 
+const mainUser = {
+  name: "BBBBBBBBB",
+  email: "BBBBBBBBBB@gmail.com",
+  password: "BBBBB",
+};
+
+beforeAll(async () => {
+  await request.post("/user").send(mainUser);
+});
+
+afterAll(async () => {
+  await request.delete(`/user/${mainUser.email}`).send(mainUser);
+});
+
 describe("User Sign Up", () => {
   it("should register an user correctly", async () => {
     const timestamp = Date.now();

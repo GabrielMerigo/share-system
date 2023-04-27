@@ -35,4 +35,9 @@ app.post("/user", async (req, res) => {
   return res.json({ email: result.email });
 });
 
+app.delete("/user/:email", async (req, res) => {
+  await User.deleteOne({ email: req.params.email });
+  res.sendStatus(200);
+});
+
 module.exports = app;
