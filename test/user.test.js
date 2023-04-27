@@ -5,7 +5,6 @@ const request = supertest(app);
 describe("User Sign Up", () => {
   it("should register an user correctly", async () => {
     const timestamp = Date.now();
-
     const user = {
       name: "Gabriel",
       email: `gabriel${timestamp}@gmail.com`,
@@ -16,5 +15,33 @@ describe("User Sign Up", () => {
 
     expect(result.statusCode).toEqual(200);
     expect(result.body.email).toEqual(user.email);
+  });
+
+  it("shouldn't allow an user register empty data", async () => {
+    const user = {
+      name: "",
+      email: "",
+      password: "",
+    };
+
+    const result = await request.post("/user").send(user);
+    expect(result.statusCode).toEqual(400);
+  });
+
+  it("shouldn't allow an user register a new user with an existing email", async () => {
+    const timestamp = Date.now();
+    const user = {
+      name: "Gabriel",
+      email: `gabriel${timestamp}@gmail.com`,
+      password: "123",
+    };
+
+    const result = await request.post("/user").send(user);
+    expect(result.statusCode).toEqual(200);
+    expect(result.body.email).toEqual(user.email);
+
+    const resultWithSameEmail = await request.post("/user").send(user);
+    expect(resultWithSameEmail.statusCode).toEqual(400);
+    expect(resultWithSameEmail.error).toBeTruthy();
   });
 });

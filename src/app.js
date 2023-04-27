@@ -14,15 +14,25 @@ app.get("/", (req, res) => {
   res.json({});
 });
 
-// VERIFICAR ERROR
 app.post("/user", async (req, res) => {
+  const { name, email, password } = req.body;
+
+  if (!name || !email || !password) return res.sendStatus(400);
+  const user = await User.findOne({ email: email });
+  if (user) {
+    res.statusCode = 400;
+    res.json({ erru: "Email existing, try another one..." });
+    return;
+  }
+
   const newUser = new User({
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.password,
+    name,
+    email,
+    password,
   });
 
-  await newUser.save();
+  const result = await newUser.save();
+  return res.json({ email: result.email });
 });
 
 module.exports = app;
