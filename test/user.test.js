@@ -3,9 +3,9 @@ const supertest = require("supertest");
 const request = supertest(app);
 
 const mainUser = {
-  name: "BBBBBBBBB",
-  email: "BBBBBBBBBB@gmail.com",
-  password: "BBBBB",
+  name: "mainUser",
+  email: "mainUser@gmail.com",
+  password: "mainUserPassword",
 };
 
 beforeAll(async () => {
@@ -66,6 +66,25 @@ describe("Authentication", () => {
       .post("/auth")
       .send({ email: mainUser.email, password: mainUser.password });
 
+    expect(result.statusCode).toEqual(200);
     expect(result.body.token).toBeDefined();
+  });
+
+  it("shouldn't allow sign in an user not registered", async () => {
+    const result = await request
+      .post("/auth")
+      .send({ email: "emailNotExisting@gmail.com", password: "123456" });
+
+    expect(result.statusCode).toEqual(403);
+    expect(result.error).toBeTruthy();
+  });
+
+  it("shouldn't allow sign in with a wrong password", async () => {
+    const result = await request
+      .post("/auth")
+      .send({ email: mainUser.email, password: "123456" });
+
+    expect(result.statusCode).toEqual(403);
+    expect(result.error).toBeTruthy();
   });
 });

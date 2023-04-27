@@ -1,7 +1,9 @@
 const express = require("express");
+const jwt = require("jsonwebtoken");
 const app = express();
 const mongoose = require("mongoose");
 const userModel = require("./models/User");
+const secret = "super-secret-key";
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -21,7 +23,7 @@ app.post("/user", async (req, res) => {
   const user = await User.findOne({ email: email });
   if (user) {
     res.statusCode = 400;
-    res.json({ erru: "Email existing, try another one..." });
+    res.json({ error: "Email existing, try another one..." });
     return;
   }
 
@@ -38,6 +40,36 @@ app.post("/user", async (req, res) => {
 app.delete("/user/:email", async (req, res) => {
   await User.deleteOne({ email: req.params.email });
   res.sendStatus(200);
+});
+
+app.post("/auth", async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    res.statusCode = 403;
+    return res.json({ error: "Email not registered" });
+  }
+
+  if (user.password !== password) {
+    res.statusCode = 403;
+    return res.json({ error: "Wrong password" });
+  }
+
+  jwt.sign(
+    { email, user: user.name, id: user._id },
+    secret,
+    { expiresIn: "48h" },
+    (err, token) => {
+      if (err) {
+        res.sendStatus(500);
+        console.log(err);
+      } else {
+        res.json({ token: 123 });
+      }
+    }
+  );
 });
 
 module.exports = app;
